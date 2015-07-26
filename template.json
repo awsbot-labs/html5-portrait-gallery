@@ -53,40 +53,40 @@
     },
     "Resources": {
         "BucketPolicy": {
-          "Type": "AWS::S3::BucketPolicy",
-          "Properties": {
-              "PolicyDocument": {
-                  "Id": "S3BucketPolicy",
-                  "Statement": [
-                      {
-                          "Sid": "ReadAccess",
-                          "Action": [
-                              "s3:GetObject"
-                          ],
-                          "Effect": "Allow",
-                          "Resource": {
-                              "Fn::Join": [
-                                  "",
-                                  [
-                                      "arn:aws:s3:::",
-                                      {
-                                          "Ref": "WWWBucket"
-                                      },
-                                      "/*"
-                                  ]
-                              ]
-                          },
-                          "Principal": {
-                              "AWS": "*"
-                          }
-                      }
-                  ]
-              },
-              "Bucket": {
-                  "Ref": "WWWBucket"
-              }
-          }
-      },
+            "Type": "AWS::S3::BucketPolicy",
+            "Properties": {
+                "PolicyDocument": {
+                    "Id": "S3BucketPolicy",
+                    "Statement": [
+                        {
+                            "Sid": "ReadAccess",
+                            "Action": [
+                                "s3:GetObject"
+                            ],
+                            "Effect": "Allow",
+                            "Resource": {
+                                "Fn::Join": [
+                                    "",
+                                    [
+                                        "arn:aws:s3:::",
+                                        {
+                                            "Ref": "WWWBucket"
+                                        },
+                                        "/*"
+                                    ]
+                                ]
+                            },
+                            "Principal": {
+                                "AWS": "*"
+                            }
+                        }
+                    ]
+                },
+                "Bucket": {
+                    "Ref": "WWWBucket"
+                }
+            }
+        },
         "WWWBucket": {
             "Type": "AWS::S3::Bucket",
             "Properties": {
@@ -107,7 +107,7 @@
                 },
                 "WebsiteConfiguration": {
                     "IndexDocument": "index.html",
-                    "ErrorDocument":"404.html"
+                    "ErrorDocument": "404.html"
                 },
                 "Tags": [
                     {
@@ -131,18 +131,50 @@
             "Type": "AWS::Route53::RecordSetGroup",
             "Properties": {
                 "HostedZoneName": {
-                    "Fn::Join": ["", [{"Ref": "DomainName"}, "."]]
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "DomainName"
+                            },
+                            "."
+                        ]
+                    ]
                 },
                 "Comment": "Zone apex alias.",
                 "RecordSets": [
                     {
-                      "Name": {
-                          "Fn::Join": ["", ["www.", {"Ref":"DomainName"}]]
-                      },
+                        "Name": {
+                            "Fn::Join": [
+                                "",
+                                [
+                                    "www.",
+                                    {
+                                        "Ref": "DomainName"
+                                    }
+                                ]
+                            ]
+                        },
                         "Type": "A",
                         "AliasTarget": {
-                            "HostedZoneId": {"Fn::FindInMap" : [ "RegionMap", { "Ref" : "AWS::Region" }, "ZoneId"]},
-                            "DNSName": {"Fn::FindInMap" : [ "RegionMap", { "Ref" : "AWS::Region" }, "EndPoint"]}
+                            "HostedZoneId": {
+                                "Fn::FindInMap": [
+                                    "RegionMap",
+                                    {
+                                        "Ref": "AWS::Region"
+                                    },
+                                    "ZoneId"
+                                ]
+                            },
+                            "DNSName": {
+                                "Fn::FindInMap": [
+                                    "RegionMap",
+                                    {
+                                        "Ref": "AWS::Region"
+                                    },
+                                    "EndPoint"
+                                ]
+                            }
                         }
                     }
                 ]
@@ -151,7 +183,12 @@
     },
     "Outputs": {
         "WebsiteURL": {
-            "Value": {"Fn::GetAtt": ["WWWBucket", "WebsiteURL"]},
+            "Value": {
+                "Fn::GetAtt": [
+                    "WWWBucket",
+                    "WebsiteURL"
+                ]
+            },
             "Description": "URL for website hosted on S3"
         }
     }
