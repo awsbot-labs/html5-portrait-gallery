@@ -1,0 +1,158 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Creates an s3 bucket website.",
+    "Parameters": {
+        "DomainName": {
+            "Type": "String",
+            "Description": "The registered DNS domain name for this application, e.g. example.com"
+        }
+    },
+    "Mappings": {
+        "RegionMap": {
+            "us-east-1": {
+                "ZoneId": "Z3AQBSTGFYJSTF",
+                "Region": "US Standard",
+                "EndPoint": "s3-website-us-east-1.amazonaws.com"
+            },
+            "us-west-1": {
+                "ZoneId": "Z2F56UZL2M1ACD",
+                "Region": "US West (N. California)",
+                "EndPoint": "s3-website-us-west-1.amazonaws.com"
+            },
+            "us-west-2": {
+                "ZoneId": "Z3BJ6K6RIION7M",
+                "Region": "US West (Oregon)",
+                "EndPoint": "s3-website-us-west-2.amazonaws.com"
+            },
+            "eu-west-1": {
+                "ZoneId": "Z1BKCTXD74EZPE",
+                "Region": "EU (Ireland)",
+                "EndPoint": "s3-website-eu-west-1.amazonaws.com"
+            },
+            "eu-central-1": {
+                "ZoneId": "Z21DNDUVLTQW6Q",
+                "Region": "EU (Frankfurt)",
+                "EndPoint": "s3-website-eu-central-1.amazonaws.com"
+            },
+            "ap-southeast-1": {
+                "ZoneId": "Z1WCIGYICN2BYD",
+                "Region": "Asia Pacific (Sydney)",
+                "EndPoint": "s3-website-ap-southeast-2.amazonaws.com"
+            },
+            "ap-northeast-1": {
+                "ZoneId": "Z2M4EHUR26P7ZW",
+                "Region": "Asia Pacific (Tokyo)",
+                "EndPoint": "s3-website-ap-northeast-1.amazonaws.com"
+            },
+            "sa-east-1": {
+                "ZoneId": "Z7KQH4QJS55SO",
+                "Region": "South America (Sao Paulo)",
+                "EndPoint": "s3-website-sa-east-1.amazonaws.com"
+            }
+        }
+    },
+    "Resources": {
+        "BucketPolicy": {
+          "Type": "AWS::S3::BucketPolicy",
+          "Properties": {
+              "PolicyDocument": {
+                  "Id": "S3BucketPolicy",
+                  "Statement": [
+                      {
+                          "Sid": "ReadAccess",
+                          "Action": [
+                              "s3:GetObject"
+                          ],
+                          "Effect": "Allow",
+                          "Resource": {
+                              "Fn::Join": [
+                                  "",
+                                  [
+                                      "arn:aws:s3:::",
+                                      {
+                                          "Ref": "WWWBucket"
+                                      },
+                                      "/*"
+                                  ]
+                              ]
+                          },
+                          "Principal": {
+                              "AWS": "*"
+                          }
+                      }
+                  ]
+              },
+              "Bucket": {
+                  "Ref": "WWWBucket"
+              }
+          }
+      },
+        "WWWBucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+                "AccessControl": "PublicRead",
+                "BucketName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "www.",
+                            {
+                                "Ref": "DomainName"
+                            }
+                        ]
+                    ]
+                },
+                "VersioningConfiguration": {
+                    "Status": "Enabled"
+                },
+                "WebsiteConfiguration": {
+                    "IndexDocument": "index.html",
+                    "ErrorDocument":"404.html"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                "",
+                                [
+                                    "www.",
+                                    {
+                                        "Ref": "DomainName"
+                                    }
+                                ]
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        "DNS": {
+            "Type": "AWS::Route53::RecordSetGroup",
+            "Properties": {
+                "HostedZoneName": {
+                    "Fn::Join": ["", [{"Ref": "DomainName"}, "."]]
+                },
+                "Comment": "Zone apex alias.",
+                "RecordSets": [
+                    {
+                      "Name": {
+                          "Fn::Join": ["", ["www.", {"Ref":"DomainName"}]]
+                      },
+                        "Type": "A",
+                        "AliasTarget": {
+                            "HostedZoneId": {"Fn::FindInMap" : [ "RegionMap", { "Ref" : "AWS::Region" }, "ZoneId"]},
+                            "DNSName": {"Fn::FindInMap" : [ "RegionMap", { "Ref" : "AWS::Region" }, "EndPoint"]}
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    "Outputs": {
+        "WebsiteURL": {
+            "Value": {"Fn::GetAtt": ["WWWBucket", "WebsiteURL"]},
+            "Description": "URL for website hosted on S3"
+        }
+    }
+}
