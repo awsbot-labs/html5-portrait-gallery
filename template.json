@@ -90,7 +90,6 @@
         "WWWBucket": {
             "Type": "AWS::S3::Bucket",
             "Properties": {
-                "AccessControl": "PublicRead",
                 "BucketName": {
                     "Fn::Join": [
                         "",
@@ -101,6 +100,7 @@
                         ]
                     ]
                 },
+                "AccessControl": "PublicRead",
                 "VersioningConfiguration": {
                     "Status": "Enabled"
                 },
@@ -141,6 +141,32 @@
                 },
                 "Comment": "Zone apex alias.",
                 "RecordSets": [
+                    {
+                        "Name": {
+                            "Ref": "DomainName"
+                        },
+                        "Type": "A",
+                        "AliasTarget": {
+                            "HostedZoneId": {
+                                "Fn::FindInMap": [
+                                    "RegionMap",
+                                    {
+                                        "Ref": "AWS::Region"
+                                    },
+                                    "ZoneId"
+                                ]
+                            },
+                            "DNSName": {
+                                "Fn::FindInMap": [
+                                    "RegionMap",
+                                    {
+                                        "Ref": "AWS::Region"
+                                    },
+                                    "EndPoint"
+                                ]
+                            }
+                        }
+                    },
                     {
                         "Name": {
                             "Fn::Join": [
