@@ -95,7 +95,6 @@
                     "Fn::Join": [
                         "",
                         [
-                            "www.",
                             {
                                 "Ref": "DomainName"
                             }
@@ -107,7 +106,7 @@
                 },
                 "WebsiteConfiguration": {
                     "IndexDocument": "index.html",
-                    "ErrorDocument": "404.html"
+                    "ErrorDocument": "index.html"
                 },
                 "Tags": [
                     {
@@ -116,7 +115,6 @@
                             "Fn::Join": [
                                 "",
                                 [
-                                    "www.",
                                     {
                                         "Ref": "DomainName"
                                     }
@@ -148,7 +146,6 @@
                             "Fn::Join": [
                                 "",
                                 [
-                                    "www.",
                                     {
                                         "Ref": "DomainName"
                                     }
