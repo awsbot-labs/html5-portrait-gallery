@@ -1,0 +1,9 @@
+#!/bin/bash
+trap abort EXIT
+
+abort () {
+  echo " --> Tests failed"
+}
+
+echo "Running tests, please wait"
+exit 1
