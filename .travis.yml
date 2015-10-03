@@ -1,3 +1,6 @@
 language: bash
+before_install:
+  - apt-get install python pip
+  - pip install awscli
 script:
     - bash test
