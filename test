@@ -1,9 +1,66 @@
 #!/bin/bash
-trap abort EXIT
+export STACK_NAME=$RECORD_SET-`echo $DOMAIN_NAME | sed -e 's/\./\-/g'`
+export VERSION=`cat VERSION`
+export ROOT_URL=$DOMAIN_NAME/index.html
 
-abort () {
-  echo " --> Tests failed"
+function abort()
+{
+  echo " *** ERROR $@"
+  exit 1
 }
 
-echo "Running tests, please wait"
-exit 1
+function cleanup()
+{
+  echo " --> Cleaning up"
+
+  echo " --> Removing s3 versions from root bucket"
+  aws s3 rm s3://$ROOT_URL --recursive > /dev/null 2>&1
+  VERSION_IDS=`aws s3api list-object-versions --bucket reay.email --query Versions[*].VersionId --output text`
+  for ID in $VERSION_IDS; do
+    aws s3api delete-object --bucket $DOMAIN_NAME --version-id $ID --key index.html > /dev/null 2>&1
+  done
+
+  echo " --> Deleting CloudFormation stack"
+  aws cloudformation delete-stack --stack-name $STACK_NAME > /dev/null 2>&1
+  echo "Finished at $(date -u +%Y-%m-%dT%H:%M:%S%z)"
+}
+
+echo "Started at $(date -u +%Y-%m-%dT%H:%M:%S%z)"
+trap cleanup EXIT
+
+echo " --> Creating Cloudformation stack"
+aws cloudformation create-stack \
+  --stack-name $STACK_NAME \
+  --template-body file://template.json \
+  --capabilities CAPABILITY_IAM \
+  --output text \
+  --parameters ParameterKey=DomainName,ParameterValue=$DOMAIN_NAME \
+ParameterKey=RecordSet,ParameterValue=$RECORD_SET > /dev/null 2>&1
+
+echo " --> Watching stack progress, please wait..."
+STACK_STATUS=CREATE_IN_PROGRESS
+while [ "$STACK_STATUS" == "CREATE_IN_PROGRESS" ]; do
+  STACK_STATUS=`aws cloudformation describe-stacks --stack-name $STACK_NAME --query Stacks[*].StackStatus --output text`
+  if [[ ( "$STACK_STATUS" == "CREATE_COMPLETE" ) || ( "$STACK_STATUS" == "DELETE_COMPLETE" ) || ( "$STACK_STATUS" == "DELETE_FAILED" ) ]]; then
+    break
+  fi
+  sleep 3
+done
+
+MSG="Uploading document to website"
+echo " --> $MSG"
+aws s3 cp VERSION s3://$ROOT_URL > /dev/null 2>&1
+
+MSG="Checking redirect bucket"
+echo " --> $MSG"
+curl -s -k -L http://$RECORD_SET.$ROOT_URL | grep $VERSION > /dev/null 2>&1
+if [ $? -ne 0 ]; then
+  abort $MSG
+fi
+
+MSG="Checking root bucket"
+echo " --> $MSG"
+curl -s -k http://$ROOT_URL | grep $VERSION > /dev/null 2>&1
+if [ $? -ne 0 ]; then
+  abort $MSG
+fi

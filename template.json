@@ -5,6 +5,11 @@
         "DomainName": {
             "Type": "String",
             "Description": "The registered DNS domain name for this application, e.g. example.com"
+        },
+        "RecordSet": {
+          "Type": "String",
+          "Description": "A DNS record set",
+          "Default": "www"
         }
     },
     "Mappings": {
@@ -70,7 +75,7 @@
                                     [
                                         "arn:aws:s3:::",
                                         {
-                                            "Ref": "WWWBucket"
+                                            "Ref": "RootBucket"
                                         },
                                         "/*"
                                     ]
@@ -83,13 +88,14 @@
                     ]
                 },
                 "Bucket": {
-                    "Ref": "WWWBucket"
+                    "Ref": "RootBucket"
                 }
             }
         },
-        "WWWBucket": {
+        "RootBucket": {
             "Type": "AWS::S3::Bucket",
             "Properties": {
+                "AccessControl": "PublicRead",
                 "BucketName": {
                     "Fn::Join": [
                         "",
@@ -100,7 +106,6 @@
                         ]
                     ]
                 },
-                "AccessControl": "PublicRead",
                 "VersioningConfiguration": {
                     "Status": "Enabled"
                 },
@@ -125,6 +130,33 @@
                 ]
             }
         },
+        "WWWBucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+                "BucketName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                              "Ref":"RecordSet"
+                            },
+                            ".",
+                            {
+                                "Ref": "DomainName"
+                            }
+                        ]
+                    ]
+                },
+                "AccessControl": "BucketOwnerFullControl",
+                "WebsiteConfiguration": {
+                    "RedirectAllRequestsTo": {
+                        "HostName": {
+                            "Ref": "RootBucket"
+                        }
+                    }
+                }
+            }
+        },
         "DNS": {
             "Type": "AWS::Route53::RecordSetGroup",
             "Properties": {
@@ -143,7 +175,14 @@
                 "RecordSets": [
                     {
                         "Name": {
-                            "Ref": "DomainName"
+                            "Fn::Join": [
+                                "",
+                                [
+                                    {
+                                        "Ref": "DomainName"
+                                    }
+                                ]
+                            ]
                         },
                         "Type": "A",
                         "AliasTarget": {
@@ -172,6 +211,10 @@
                             "Fn::Join": [
                                 "",
                                 [
+                                    {
+                                      "Ref":"RecordSet"
+                                    },
+                                    ".",
                                     {
                                         "Ref": "DomainName"
                                     }

@@ -4,12 +4,17 @@ if [ $# -eq 0 ]; then
   echo "e.g. $0 create|update|delete example.com"
   exit 1
 else
+  RECORD_SET=${3:=www}
+
   # Create a stack name based on the DomainName
   # Cloudformation doesn't accept periods in names
-  export AWS_DEFAULT_PROFILE=`echo $2 | sed -e 's/\./\-/g'`
-  
-  # Configures the aws-cli, requires an access key id and secret
-  aws configure --profile $AWS_DEFAULT_PROFILE
+  if [ "$AWS_DEFAULT_PROFILE" != "$RECORD_SET-`echo $2 | sed -e 's/\./\-/g'`" ]; then
+    export AWS_DEFAULT_PROFILE=$RECORD_SET-`echo $2 | sed -e 's/\./\-/g'`
+    # Configures the aws-cli, requires an access key id and secret
+    aws configure --profile $AWS_DEFAULT_PROFILE
+  else 
+    echo "Using default profile $AWS_DEFAULT_PROFILE"
+  fi
   
   if [ "$1" != "delete" ]; then
     # Creates a CloudFormation stack for the s3 bucket website
@@ -18,6 +23,7 @@ else
       --template-body file://template.json \
       --capabilities CAPABILITY_IAM \
       --parameters ParameterKey=DomainName,ParameterValue=$2
+ParameterKey=RecordSet,ParameterValue=$RECORD_SET
   else
     aws cloudformtation delete-stack --stack-name $AWS_DEFAULT_PROFILE
   fi
