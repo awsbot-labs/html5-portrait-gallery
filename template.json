@@ -75,7 +75,7 @@
                                     [
                                         "arn:aws:s3:::",
                                         {
-                                            "Ref": "RootBucket"
+                                            "Ref": "WWWBucket"
                                         },
                                         "/*"
                                     ]
@@ -88,11 +88,11 @@
                     ]
                 },
                 "Bucket": {
-                    "Ref": "RootBucket"
+                    "Ref": "WWWBucket"
                 }
             }
         },
-        "RootBucket": {
+        "WWWBucket": {
             "Type": "AWS::S3::Bucket",
             "Properties": {
                 "AccessControl": "PublicRead",
@@ -100,6 +100,10 @@
                     "Fn::Join": [
                         "",
                         [
+                            {
+                              "Ref":"RecordSet"
+                            },
+                            ".",
                             {
                                 "Ref": "DomainName"
                             }
@@ -120,41 +124,18 @@
                             "Fn::Join": [
                                 "",
                                 [
-                                    {
-                                        "Ref": "DomainName"
-                                    }
+                                  {
+                                    "Ref":"RecordSet"
+                                  },
+                                  ".",
+                                  {
+                                      "Ref": "DomainName"
+                                  }
                                 ]
                             ]
                         }
                     }
                 ]
-            }
-        },
-        "WWWBucket": {
-            "Type": "AWS::S3::Bucket",
-            "Properties": {
-                "BucketName": {
-                    "Fn::Join": [
-                        "",
-                        [
-                            {
-                              "Ref":"RecordSet"
-                            },
-                            ".",
-                            {
-                                "Ref": "DomainName"
-                            }
-                        ]
-                    ]
-                },
-                "AccessControl": "BucketOwnerFullControl",
-                "WebsiteConfiguration": {
-                    "RedirectAllRequestsTo": {
-                        "HostName": {
-                            "Ref": "RootBucket"
-                        }
-                    }
-                }
             }
         },
         "DNS": {
@@ -173,39 +154,6 @@
                 },
                 "Comment": "Zone apex alias.",
                 "RecordSets": [
-                    {
-                        "Name": {
-                            "Fn::Join": [
-                                "",
-                                [
-                                    {
-                                        "Ref": "DomainName"
-                                    }
-                                ]
-                            ]
-                        },
-                        "Type": "A",
-                        "AliasTarget": {
-                            "HostedZoneId": {
-                                "Fn::FindInMap": [
-                                    "RegionMap",
-                                    {
-                                        "Ref": "AWS::Region"
-                                    },
-                                    "ZoneId"
-                                ]
-                            },
-                            "DNSName": {
-                                "Fn::FindInMap": [
-                                    "RegionMap",
-                                    {
-                                        "Ref": "AWS::Region"
-                                    },
-                                    "EndPoint"
-                                ]
-                            }
-                        }
-                    },
                     {
                         "Name": {
                             "Fn::Join": [

@@ -1,30 +1,35 @@
 #!/bin/bash
 if [ $# -eq 0 ]; then
-  echo "Usage: $0 create|update|delete <DOMAIN_NAME>"
-  echo "e.g. $0 create|update|delete example.com"
+  echo "Usage: $0 create|update|delete <RECORD_SET> <DOMAIN_NAME>"
+  echo "e.g. $0 create|update|delete gallery cloudsarelies.com"
   exit 1
 else
-  RECORD_SET=${3:=www}
+  export STACK_NAME=$2-`echo $3 | sed -e 's/\./\-/g'`
+  if [ -e "vars" ]; then
+    source "vars"
+  else
+    # Create a stack name based on the DomainName
+    # Cloudformation doesn't accept periods in names
+    if [ "$AWS_DEFAULT_PROFILE" != "$STACK_NAME" ]; then
+      export AWS_DEFAULT_PROFILE=$STACK_NAME
+      # Configures the aws-cli, requires an access key id and secret
+      aws configure --profile $AWS_DEFAULT_PROFILE
+    else 
+      echo "Using default profile $AWS_DEFAULT_PROFILE"
+    fi
+  fi 
 
-  # Create a stack name based on the DomainName
-  # Cloudformation doesn't accept periods in names
-  if [ "$AWS_DEFAULT_PROFILE" != "$RECORD_SET-`echo $2 | sed -e 's/\./\-/g'`" ]; then
-    export AWS_DEFAULT_PROFILE=$RECORD_SET-`echo $2 | sed -e 's/\./\-/g'`
-    # Configures the aws-cli, requires an access key id and secret
-    aws configure --profile $AWS_DEFAULT_PROFILE
-  else 
-    echo "Using default profile $AWS_DEFAULT_PROFILE"
-  fi
-  
   if [ "$1" != "delete" ]; then
     # Creates a CloudFormation stack for the s3 bucket website
     aws cloudformation $1-stack \
-      --stack-name $AWS_DEFAULT_PROFILE \
+      --stack-name $STACK_NAME \
       --template-body file://template.json \
       --capabilities CAPABILITY_IAM \
-      --parameters ParameterKey=DomainName,ParameterValue=$2
+      --notification-arns $NOTIFICATION_ARNS \
+      --parameters \
+ParameterKey=DomainName,ParameterValue=$DOMAIN_NAME \
 ParameterKey=RecordSet,ParameterValue=$RECORD_SET
   else
-    aws cloudformtation delete-stack --stack-name $AWS_DEFAULT_PROFILE
+    aws cloudformation delete-stack --stack-name $STACK_NAME
   fi
 fi
