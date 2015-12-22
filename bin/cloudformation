@@ -23,7 +23,7 @@ else
     # Creates a CloudFormation stack for the s3 bucket website
     aws cloudformation $1-stack \
       --stack-name $STACK_NAME \
-      --template-body file://template.json \
+      --template-body file://cloudformation.json \
       --capabilities CAPABILITY_IAM \
       --notification-arns $NOTIFICATION_ARNS \
       --parameters \

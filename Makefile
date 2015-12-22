@@ -1,4 +1,5 @@
 DATE = $(shell date)
+ENV_FILE ?= "vars"
 .PHONY: run test upload
 
 all: build install
@@ -19,8 +20,11 @@ test:
 	@bin/test
 
 install:
-	@bin/install
-	
+	@env ENV_FILE=$(ENV_FILE) bin/install
+
+download:
+	@bin/download
+
 run:
 	@bin/run
 
@@ -28,7 +32,7 @@ portrait:
 	@echo "firstname_lastname:"
 	@read REPLY; \
 	mkdir -p portraits/$$REPLY && \
-	cp -f index.html portraits/$$REPLY/index.html
+	cp -f portraits/index.html portraits/$$REPLY/index.html
 
 release:
 	@echo "Commit message:"
