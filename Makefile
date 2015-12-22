@@ -1,23 +1,31 @@
 DATE = $(shell date)
 .PHONY: run test upload
 
+all: build install
+
+build:
+	@bin/build
+
 create:
-	./run create
+	@bin/cloudformation create
 
 update:
-	./run update
+	@bin/cloudformation update
 
 delete:
-	./run delete
+	@bin/cloudformation delete
 
 test:
-	./test
+	@bin/test
 
-upload:
-	./upload
+install:
+	@bin/install
+	
+run:
+	@bin/run
 
 portrait:
-	@echo "first_last:"
+	@echo "firstname_lastname:"
 	@read REPLY; \
 	mkdir -p portraits/$$REPLY && \
 	cp -f index.html portraits/$$REPLY/index.html

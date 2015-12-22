@@ -5,4 +5,4 @@ else
   export AWS_DEFAULT_PROFILE=`echo $DOMAIN_NAME | sed -e 's/\./\-/g'`
   aws configure --profile $AWS_DEFAULT_PROFILE
 fi
-aws s3 sync . s3://$RECORD_SET.$DOMAIN_NAME --exclude ".*"
+aws s3 sync ./public s3://$RECORD_SET.$DOMAIN_NAME --exclude ".*"

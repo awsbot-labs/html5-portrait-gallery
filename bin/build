@@ -1,24 +1,17 @@
 #!/bin/bash
+SRC_DIR=src/
+function build() {
+  FILE=$1
+  > $FILE
+  echo $FILE
+  cat src/html/head.html >> $FILE
+  cat src/html/body.html >> $FILE
+  cat src/html/tail.html >> $FILE
+}
+export -f build
+find ./portraits -name '*.html' -exec bash -c 'build "$0"' {} \;
+cp -rf src/css public/
+cp -rf src/js public/
+cp -rf portraits/* public/
 
-if [ $# -eq 0 ]; then
-  echo "Usage: $0 white|black|alternative"
-  echo "e.g. $0 white"
-  exit 1
-else
-  SRC_DIR=src/
-  function build() {
-    FILE=public/`basename $1`
-    > $FILE
-    cat head.html >> $FILE
-    cat header.html >> $FILE
-    cat $1 >> $FILE
-    cat footer.html >> $FILE
-    cat tail.html >> $FILE
-  }
-  export -f build
-  find src/ -name '*.html' -exec bash -c 'build "$0"' {} \;
-  cp -rf src/css public/
-  cp -rf src/js public/
-  cp -rf src/images public/
-  cp -rf src/favicon.png public/
-fi
+
