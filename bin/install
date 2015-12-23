@@ -5,4 +5,6 @@ fi
 export AWS_DEFAULT_PROFILE=`echo $DOMAIN_NAME | sed -e 's/\./\-/g'`
 aws configure --profile $AWS_DEFAULT_PROFILE
 
-aws s3 sync ./public s3://$RECORD_SET.$DOMAIN_NAME --sse
+aws s3 sync ./public s3://$RECORD_SET.$DOMAIN_NAME --sse --exclude ".*"
+aws s3 cp ./VERSION s3://$RECORD_SET.$DOMAIN_NAME --sse
+aws s3 cp ./LICENSE s3://$RECORD_SET.$DOMAIN_NAME --sse

@@ -4,14 +4,9 @@ function build() {
   FILE=$1
   > $FILE
   echo $FILE
-  cat src/html/head.html >> $FILE
-  cat src/html/body.html >> $FILE
-  cat src/html/tail.html >> $FILE
+  cat public/index.html >> $FILE
 }
 export -f build
-find ./src/portraits -name '*.html' -exec bash -c 'build "$0"' {} \;
-cp -rf src/css public/
-cp -rf src/js public/
-cp -rf src/portraits/* public/portraits/
+find ./public/portraits -name '*.html' -exec bash -c 'build "$0"' {} \;
 
 
