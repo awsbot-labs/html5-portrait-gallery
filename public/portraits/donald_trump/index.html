@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <link rel="shortcut icon" type="image/png" href="favicon.ico">
   <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
-   <script type="text/javascript" src="https://raw.githubusercontent.com/dcrbsltd/s3-bucket-listing/master/list.js"></script>
+  <script type="text/javascript" src="/js/gallery.js"></script>
   <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
   <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
   <link href="/css/style.css" rel="stylesheet">
@@ -16,7 +16,6 @@
     text-align: center;
     vertical-align: middle;
   }
-
   #wrapper{
     width:500px;
     height:500px;
@@ -41,18 +40,18 @@
   <body>
     <div id="wrapper">
     <object style="width:" type="image/svg+xml" data="portrait.svg">
-    <object style="width:" type="image/svg+xml" data="/portrait.svg">
-    </object>
+      <object style="width:" type="image/svg+xml" data="/portrait.svg">
+      </object>
     </object>
       <form id="form">
         <input type="text" class="search" id="name" placeholder="say my name" style="text-align:center;"></input>
       </form>
     </div>
     <script type="text/javascript">
-     var S3BL_IGNORE_PATH = false;
+      var S3BL_IGNORE_PATH = false;
       // var BUCKET_NAME = 'BUCKET';
-     var BUCKET_URL = 'http://gallery.cloudsarelies.com.s3-eu-west-1.amazonaws.com';
-      // var S3B_ROOT_DIR = 'SUBDIR_L1/SUBDIR_L2/';
+      var BUCKET_URL = 'http://gallery.cloudsarelies.com.s3-eu-west-1.amazonaws.com';
+      var S3B_ROOT_DIR = 'portraits/';
       var input = document.getElementById("name");
       if (window.location.pathname !== "/") {
         input.setAttribute("placeholder", window.location.pathname.replace(/\/portraits\//g, "").replace(/\//g, "").replace(/_/g, " ") );
@@ -62,11 +61,12 @@
       $('#form').submit(function (evt) {
         evt.preventDefault();
         var value = $( "input" ).val().toLowerCase().replace(/ /g,"_") + "/";
-        window.location.href = "/portraits/"+value;
+        window.location.href = "/portraits/" + value;
       });
     </script>
     <script src="http://gallery.cloudsarelies.com/js/facebook-sdk.js"></script>
     <script src="http://gallery.cloudsarelies.com/js/google-analytics.js"></script>
     <script src="https://sdk.amazonaws.com/js/aws-sdk-2.2.25.min.js"></script>
 	</body>
-  <!-- End Body --></html>
+  <!-- End Body -->
+</html>

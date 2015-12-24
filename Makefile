@@ -31,8 +31,8 @@ run:
 portrait:
 	@echo "firstname_lastname:"
 	@read REPLY; \
-	mkdir -p portraits/$$REPLY && \
-	cp -f portraits/index.html portraits/$$REPLY/index.html
+	mkdir -p public/portraits/$$REPLY && \
+	cp -f public/index.html portraits/$$REPLY/index.html
 
 release:
 	@echo "Commit message:"
