@@ -8,3 +8,4 @@ function build() {
 }
 export -f build
 find ./public/portraits -name '*.html' -exec bash -c 'build "$0"' {} \;
+
